@@ -1,9 +1,11 @@
 <?php
-require 'db.php'; require 'functions.php'; require 'layout.php';
+require "db.php";
+require "functions.php";
+require "layout.php";
 page_header('Audit Documenti Accessori','cldc');
 
 $langs = db_all($conn, "SELECT Code,Name FROM dbo.Language ORDER BY Code");
-$missing = db_all($conn, "EXEC dbo.sp_DocCoverageMissing @OnlyActive=1");
+$accs = db_all($conn, "SELECT Id,Code FROM dbo.Accessory WHERE Active=1 ORDER BY Code");
 
 echo '<div class="toolbar">
   <form action="api_doc_scan.php" method="post" style="display:inline">
@@ -19,19 +21,21 @@ echo '<table><tr><th>Accessory</th>';
 foreach($langs as $l) echo '<th>'.h($l['Code']).'</th>';
 echo '</tr>';
 
-$accs = db_all($conn, "SELECT Id,Code FROM dbo.Accessory WHERE Active=1 ORDER BY Code");
 foreach($accs as $a){
   echo '<tr><td>'.h($a['Code']).'</td>';
   foreach($langs as $l){
-    $doc = db_one($conn, "SELECT TOP 1 FilePath,UpdatedAt FROM dbo.AccessoryDoc WHERE AccessoryId=? AND LangCode=?",
-      [$a['Id'], $l['Code']]);
+    $doc = db_one($conn, "SELECT TOP 1 FilePath FROM dbo.AccessoryDoc WHERE AccessoryId=? AND LangCode=?", [$a['Id'], $l['Code']]);
     $inputId = 'file_'.(int)$a['Id'].'_'.h($l['Code']);
 
-        if($doc){
-      $prettyPath = $doc["FilePath"];
+    if($doc){
+      $prettyPath = $doc['FilePath'];
       if (preg_match('~[\\/](docs[\\/].*)$~i', $prettyPath, $m)) { $prettyPath = $m[1]; }
-      echo '<td><span class="checkmark" aria-label="presente">&#10003;</span> <span class="muted">'.h($prettyPath).'</span>
-            <div class="row" style="gap:6px;flex-wrap:wrap">
+      $docUrl = doc_url_from_path($doc['FilePath']);
+      $fileName = basename($prettyPath);
+      $pathHtml = $docUrl ? '<a href="'.h($docUrl).'" target="_blank">'.h($fileName).'</a>' : h($fileName);
+      echo '<td><span class="checkmark" aria-label="presente">&#10003;</span>
+            <div class="muted">'.$pathHtml.'</div>
+            <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">
               <form action="api_doc_upload.php" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="acc_id" value="'.(int)$a['Id'].'">
                 <input type="hidden" name="lang" value="'.h($l['Code']).'">
@@ -43,7 +47,7 @@ foreach($accs as $a){
                 <input type="hidden" name="lang" value="'.h($l['Code']).'">
                 <button class="btn danger" type="submit">Elimina</button>
               </form>
-            </div></td> ';
+            </div></td>';
     } else {
       echo '<td>--<form action="api_doc_upload.php" method="post" enctype="multipart/form-data">
               <input type="hidden" name="acc_id" value="'.(int)$a['Id'].'">
@@ -58,7 +62,6 @@ foreach($accs as $a){
 echo '</table>';
 ?>
 <script>
-// Trigger selezione file per i form individuali
 document.querySelectorAll('.file-trigger').forEach(btn => {
   const input = document.getElementById(btn.dataset.file);
   if (!input) return;
@@ -70,7 +73,6 @@ document.querySelectorAll('.file-trigger').forEach(btn => {
   });
 });
 
-// Upload massivo (più PDF insieme)
 const bulkBtn = document.getElementById('bulkUploadBtn');
 const bulkInput = document.getElementById('bulkFiles');
 const bulkForm = document.getElementById('bulkUploadForm');
@@ -81,3 +83,4 @@ bulkInput?.addEventListener('change', () => {
 </script>
 <?php
 page_footer();
+?>

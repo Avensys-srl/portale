@@ -7,11 +7,11 @@ function page_header($title, $section='home'){
   echo '<style>
     :root{
       color-scheme: light dark;
-      --bg:#f8fafc; --fg:#1f2933; --muted:#5f6b76; --border:#d7dde4; --th-bg:#eef2f6;
-      --btn-bg:#ffffff; --btn-border:#9aa5b1; --btn-primary:#0b63ce; --btn-danger:#b43434;
-      --pill-on-bg:#e6f4ea; --pill-on-border:#4caf50; --pill-on-text:#155724;
-      --pill-off-bg:#fbe8e8; --pill-off-border:#d9534f; --pill-off-text:#7f1d1d;
-      --tag-bg:#2f3640; --tag-border:#4a5568; --tag-text:#e5e7eb;
+      --bg:#eef1f5; --fg:#222631; --muted:#5b6372; --border:#c7ced8; --th-bg:#e0e4eb;
+      --btn-bg:#f9f9fb; --btn-border:#8f98a6; --btn-primary:#0b63ce; --btn-danger:#b43434;
+      --pill-on-bg:#dfece5; --pill-on-border:#4caf50; --pill-on-text:#1a3e2b;
+      --pill-off-bg:#f7dfdf; --pill-off-border:#d9534f; --pill-off-text:#5c1b1b;
+      --tag-bg:#303743; --tag-border:#4c5667; --tag-text:#f2f4f7;
     }
     @media (prefers-color-scheme: dark){
       :root{

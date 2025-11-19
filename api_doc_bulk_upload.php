@@ -3,7 +3,7 @@ require 'db.php'; // per uniformità (anche se non servirebbe la connessione qui
 require 'functions.php';
 
 // Cartella inbox dove lo scan andrà a prendere i file
-$inbox = __DIR__ . '/docs_inbox';
+$inbox = env_path('DOCS_INBOX_DIR','docs_inbox');
 if (!is_dir($inbox)) mkdir($inbox, 0775, true);
 
 if (empty($_FILES['files'])) {
