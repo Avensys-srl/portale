@@ -4,8 +4,31 @@ require 'functions.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-$modelId = isset($_GET['model_id']) ? (int)$_GET['model_id'] : 0;
-$lang    = strtoupper(trim($_GET['lang'] ?? ''));
+// Supporta GET, POST form-data e JSON body
+$rawBody = file_get_contents('php://input');
+$bodyJson = null;
+if ($rawBody !== false && $rawBody !== '') {
+    $decoded = json_decode($rawBody, true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        $bodyJson = $decoded;
+    }
+}
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+$modelId = 0;
+$lang    = '';
+
+if ($bodyJson) {
+    $modelId = isset($bodyJson['model_id']) ? (int)$bodyJson['model_id'] : 0;
+    $lang    = isset($bodyJson['lang']) ? strtoupper(trim($bodyJson['lang'])) : '';
+} elseif ($method === 'POST') {
+    $modelId = isset($_POST['model_id']) ? (int)$_POST['model_id'] : 0;
+    $lang    = isset($_POST['lang']) ? strtoupper(trim($_POST['lang'])) : '';
+} else { // GET fallback
+    $modelId = isset($_GET['model_id']) ? (int)$_GET['model_id'] : 0;
+    $lang    = strtoupper(trim($_GET['lang'] ?? ''));
+}
 
 if ($modelId <= 0 || $lang === '') {
     http_response_code(400);
