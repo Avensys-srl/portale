@@ -30,9 +30,10 @@ if (!$modelRow) {
 }
 
 // Accessori abilitati per il modello, con eventuale documento nella lingua richiesta
-$sql = "SELECT a.Id, a.Code, a.NameKey, d.FilePath
+$sql = "SELECT a.Id, a.Code, a.NameKey, f.Name AS FamilyName, d.FilePath
           FROM dbo.vw_UnitAccessoryMatrix m
           JOIN dbo.Accessory a ON a.Id = m.AccessoryId
+          JOIN dbo.AccessoryFamily f ON f.Id = a.FamilyId
           LEFT JOIN dbo.AccessoryDoc d ON d.AccessoryId = a.Id AND d.LangCode = ?
          WHERE m.UnitId = ? AND m.EffectiveEnabled = 1 AND a.Active = 1
          ORDER BY a.Code";
@@ -64,6 +65,7 @@ foreach ($rows as $r) {
         'accessory_id' => (int)$r['Id'],
         'code'         => $r['Code'],
         'name_key'     => $r['NameKey'],
+        'family'       => $r['FamilyName'],
         'lang'         => $lang,
         'doc_lang'     => $docLang,
         'doc_url'      => $url ?: null,
